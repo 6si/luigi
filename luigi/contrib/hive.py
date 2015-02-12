@@ -259,6 +259,8 @@ class HiveQueryTask(luigi.hadoop.BaseHadoopJobTask):
     bytes_per_reducer = None
     reducers_max = None
 
+    database = luigi.Parameter(default='default')
+
     @abc.abstractmethod
     def query(self):
         """ Text of query to run in hive """
@@ -335,7 +337,11 @@ class HiveQueryRunner(luigi.hadoop.JobRunner):
         with tempfile.NamedTemporaryFile() as f:
             f.write(job.query())
             f.flush()
-            arglist = [load_hive_cmd(), '-f', f.name]
+            if job.database:
+                arglist = [load_hive_cmd(), '--database', job.database, '-f', f.name]
+            else:
+                arglist = [load_hive_cmd(), '-f', f.name]
+
             hiverc = job.hiverc()
             if hiverc:
                 if isinstance(hiverc, str):
