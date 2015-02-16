@@ -46,6 +46,19 @@ def load_hive_cmd():
 def get_hive_syntax():
     return luigi.configuration.get_config().get('hive', 'release', 'cdh4')
 
+def parse_partition_string(line):
+    """
+    Given a string with the format 
+    key1=value1/ke2=value2/...
+    Returns a dict {key1=value1, key2=value2}
+
+    """
+
+    return dict([
+        pair.split('=')
+        for pair in line.split('/')
+    ])
+
 
 def run_hive(args, check_return_code=True):
     """
@@ -136,12 +149,18 @@ class HiveCommandClient(HiveClient):
             return stdout and table in stdout
         else:
             stdout = run_hive_cmd("""use %s; show partitions %s partition
-                                (%s)""" % (database, table, self.partition_spec(partition)))
+                                (%s)""" % (database, table, self.partition_spec(partition)))           
 
-            if stdout:
-                return True
-            else:
-                return False
+            # partition
+            # dt=2015-02-16/field=value
+
+            head,sep,rest = stdout.partition('\n')
+            assert head == 'partition'
+            for line in rest.splitlines():
+                if partition == parse_partition_string(line):
+                    return True
+            return False
+
 
     def table_schema(self, table, database='default'):
         describe = run_hive_cmd("use {0}; describe {1}".format(database, table))
