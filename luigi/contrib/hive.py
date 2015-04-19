@@ -70,15 +70,9 @@ def run_hive(args, check_return_code=True):
     so we need an option to ignore the return code and just return stdout for parsing
     """
     cmd = [load_hive_cmd()] + args
-    try:
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except Exception,e:
-        raise HiveCommandError(
-            "Hive command: {0} failed with exception: {1}".format(
-                cmd,
-                e
-            ),
-        '', '')
+    logging.info('Run hive: ' + cmd)
+
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     stdout, stderr = p.communicate()
     if check_return_code and p.returncode != 0:
