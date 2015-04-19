@@ -70,7 +70,7 @@ def run_hive(args, check_return_code=True):
     so we need an option to ignore the return code and just return stdout for parsing
     """
     cmd = [load_hive_cmd()] + args
-    logging.info('Run hive: ' + cmd)
+    logging.info('Run hive: %s', cmd)
 
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
